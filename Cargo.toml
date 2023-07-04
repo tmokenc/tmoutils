@@ -1,0 +1,10 @@
+[workspace]
+members = ["to_folder", "to_720p", "video_thumbnail", "macros"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.dependencies]
+log = "0.4"
+pretty_env_logger = "0.5"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
