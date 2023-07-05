@@ -290,13 +290,13 @@ impl Video {
         let size = fs::metadata(&p)?.len();
 
         let metadata_opt = match ext {
-            "mp4" => VideoMetadata::mp4(&p).ok(),
-            "mkv" => VideoMetadata::mkv(&p).ok(),
-            _ => None,
+            "mp4" => VideoMetadata::mp4(&p),
+            "mkv" => VideoMetadata::mkv(&p),
+            _ => Err(Error::msg("Need ffmpeg")),
         };
 
         let metadata = metadata_opt
-            .or_else(|| VideoMetadata::ffmpeg(&p).ok())
+            .or_else(|_| VideoMetadata::ffprobe(&p))
             .context("Cannot read video metadata")?;
 
         Ok(Self {
@@ -340,12 +340,11 @@ struct VideoMetadata {
 }
 
 impl VideoMetadata {
-    fn ffmpeg(p: &Path) -> Result<Self> {
+    fn ffprobe(p: &Path) -> Result<Self> {
         let cmd = Command::new("ffprobe")
             .args(["-v", "error"])
             .args(["-select_streams", "v"])
-            .arg("show_entries")
-            .arg("stream=width,height,duration")
+            .args(["-show_entries", "stream=width,height,duration"])
             .args(["-of", "csv=p=0:s=x"])
             .arg(&p)
             .output()?;
