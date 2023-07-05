@@ -285,16 +285,13 @@ impl Video {
             .context("File extension is not supported yet")?;
 
         let size = fs::metadata(&p)?.len();
-
         let metadata_opt = match ext {
             "mp4" => VideoMetadata::mp4(&p),
             "mkv" => VideoMetadata::mkv(&p),
             _ => Err(Error::msg("Need ffmpeg")),
         };
 
-        let metadata = metadata_opt
-            .or_else(|_| VideoMetadata::ffprobe(&p))
-            .context("Cannot read video metadata")?;
+        let metadata = metadata_opt.or_else(|_| VideoMetadata::ffprobe(&p))?;
 
         Ok(Self {
             path: p.to_path_buf(),
