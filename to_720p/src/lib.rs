@@ -67,7 +67,7 @@ impl Args {
         let output_dir = PathBuf::from(&self.output_dir);
 
         if path.is_file() {
-            let video = Video::from_path_buf(path)?;
+            let video = Video::from_path(&path)?;
 
             if video.is_over_sized() {
                 downscale(&video, &output_dir, &self.video, &self.audio, self.replace)?;
@@ -277,7 +277,7 @@ struct Video {
 }
 
 impl Video {
-    fn from_path_buf(p: PathBuf) -> Result<Self> {
+    fn from_path(p: &Path) -> Result<Self> {
         let ext = p.extension().context("No extension")?.to_ascii_lowercase();
         let ext = *SUPPORTED_EXT
             .into_iter()
@@ -297,7 +297,7 @@ impl Video {
             .context("Cannot read video metadata")?;
 
         Ok(Self {
-            path: p,
+            path: p.to_path_buf(),
             size,
             ext,
             metadata,
@@ -454,7 +454,7 @@ impl Iterator for Videos {
                         continue;
                     }
 
-                    match Video::from_path_buf(path) {
+                    match Video::from_path(&path) {
                         Ok(video) => return Some(video),
                         Err(why) => log::debug!("{:?} isn't a video\n{:#?}", path, why),
                     }
