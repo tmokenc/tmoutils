@@ -165,11 +165,13 @@ impl Args {
             );
 
             let video_start = Instant::now();
-            downscale(&video, &output_dir, &self.video, &self.audio, self.replace)?;
-            log::info!(
-                "Done! This video took {}",
-                humantime::format_duration(video_start.elapsed())
-            );
+            match downscale(&video, &output_dir, &self.video, &self.audio, self.replace) {
+                Ok(_) => log::info!(
+                    "Done! This video took {}",
+                    humantime::format_duration(video_start.elapsed())
+                ),
+                Err(why) => log::error!("{:#?}", why),
+            }
         }
 
         log::info!(
