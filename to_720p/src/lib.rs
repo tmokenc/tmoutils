@@ -454,8 +454,9 @@ impl Iterator for Videos {
                         continue;
                     }
 
-                    if let Ok(video) = Video::from_path_buf(path) {
-                        return Some(video);
+                    match Video::from_path_buf(path) {
+                        Ok(video) => return Some(video),
+                        Err(why) => log::debug!("{:?} isn't a video\n{:#?}", path, why),
                     }
                 }
 
