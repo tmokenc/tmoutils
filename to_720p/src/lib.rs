@@ -209,40 +209,40 @@ fn downscale(video: &Video, output_dir: &Path, cv: &str, ca: &str, replace: bool
 
     let status = command.spawn()?.wait()?;
 
-    if status.success() {
-        let old_size: i64;
-        let new_size: i64;
-
-
-        #[cfg(target_os = "linux")]
-        {
-            old_size = video.path.metadata()?.size() as i64;
-            new_size = output.metadata()?.size() as i64;
-        }
-
-        #[cfg(target_os = "windows")]
-        {
-            old_size = video.path.metadata()?.file_size() as i64;
-            new_size = output.metadata()?.file_size() as i64;
-        }
-
-        log::info!(
-            "Done {:?}\nOutput {:?}\nNew size {}MB (reduced {}MB)",
-            video.path,
-            output,
-            new_size / 1024 / 1024,
-            (old_size - new_size) / 1024 / 1024,
-        );
-
-        if replace && old_size > new_size {
-            let new_file_path = video.path.canonicalize()?.parent().unwrap().join(file_name);
-            move_file(&output, &new_file_path)?;
-        }
-
-        return Ok(());
+    if !status.success() {
+        return Err(Error::msg("Something went wrong"));
     }
 
-    Err(Error::msg("Something went wrong"))
+    let old_size: i64;
+    let new_size: i64;
+
+    #[cfg(target_os = "linux")]
+    {
+        old_size = video.path.metadata()?.size() as i64;
+        new_size = output.metadata()?.size() as i64;
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        old_size = video.path.metadata()?.file_size() as i64;
+        new_size = output.metadata()?.file_size() as i64;
+    }
+
+    log::info!(
+        "Done {:?}\nOutput {:?}\nNew size {}MB (reduced {}MB)",
+        video.path,
+        output,
+        new_size / 1024 / 1024,
+        (old_size - new_size) / 1024 / 1024,
+    );
+
+    if replace && old_size > new_size {
+        let new_file_path = video.path.canonicalize()?.parent().unwrap().join(file_name);
+        fs::remove_file(&video.path).ok();
+        move_file(&output, &new_file_path)?;
+    }
+
+    Ok(())
 }
 
 #[cfg(target_os = "linux")]
