@@ -100,12 +100,7 @@ impl Args {
             .filter(|v| {
                 let check_720 = self.force_720 && v.resolution() > 720;
                 let check_mp4 = self.force_mp4 && v.ext != "mp4";
-
-                if check_720 || check_mp4 {
-                    return true;
-                }
-
-                v.is_over_sized()
+                check_720 || check_mp4 || v.is_over_sized()
             });
 
         let mut list = iter
