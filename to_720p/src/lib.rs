@@ -343,7 +343,7 @@ impl VideoMetadata {
             .arg(&p)
             .output()?;
 
-        let mut iter = std::str::from_utf8(&cmd.stdout)?.split("x");
+        let mut iter = std::str::from_utf8(&cmd.stdout)?.trim_end().split("x");
         let width = iter.next().context("Get video width")?.parse::<u32>()?;
         let height = iter.next().context("Get video height")?.parse::<u32>()?;
         let duration = iter.next().context("Get video duration")?.parse::<f32>()?;
