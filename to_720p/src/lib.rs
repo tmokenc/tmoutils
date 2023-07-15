@@ -400,7 +400,7 @@ struct SubFolder {
 }
 
 struct Videos {
-    sub: Vec<SubFolder>,
+    sub: LinkedList<SubFolder>,
     ignores: Vec<PathBuf>,
     max_depth: u16,
     current_depth: u16,
@@ -417,7 +417,7 @@ impl Videos {
         fs::read_dir(path).map(|iter| Self {
             max_depth,
             current_depth: 0,
-            sub: Vec::new(),
+            sub: Default::default(),
             ignores,
             iter,
         })
@@ -442,7 +442,7 @@ impl Iterator for Videos {
 
                     if path.is_dir() {
                         if self.max_depth > self.current_depth {
-                            self.sub.push(SubFolder {
+                            self.sub.push_back(SubFolder {
                                 depth: self.current_depth + 1,
                                 path,
                             });
@@ -458,7 +458,7 @@ impl Iterator for Videos {
                 }
 
                 None => {
-                    let sub = self.sub.pop()?;
+                    let sub = self.sub.pop_back()?;
 
                     if let Ok(iter) = fs::read_dir(sub.path) {
                         self.iter = iter;
