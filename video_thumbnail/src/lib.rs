@@ -70,6 +70,8 @@ fn change_thumbnail(path: &Path) -> Result<PathBuf> {
         .filter_map(|v| v.ok())
         .map(|v| v.path());
 
+    let mut maybe = Vec::new();
+
     for entry in entries {
         if entry.is_dir() {
             continue;
@@ -84,15 +86,27 @@ fn change_thumbnail(path: &Path) -> Result<PathBuf> {
             continue;
         }
 
-        let name = match entry.file_stem() {
-            Some(n) => n,
-            None => continue,
+        let Some(name) = entry.file_stem() else {
+            continue;
         };
 
         if name == dir_name || is_known_by_name(name) || is_getchu_name(&name) {
             if gio_set_thumbnail(path, &entry).is_ok() {
                 return Ok(entry);
             }
+        }
+
+        maybe.push((entry.to_path_buf(), name.to_os_string()));
+    }
+
+    let guess = maybe
+        .iter()
+        .find_map(|(path, name)| name.to_str()?.parse::<u64>().ok().map(|_| path))
+        .or_else(|| maybe.first().map(|(path, _)| path));
+
+    if let Some(guessed) = guess {
+        if gio_set_thumbnail(path, &guessed).is_ok() {
+            return Ok(guessed.to_path_buf());
         }
     }
 
