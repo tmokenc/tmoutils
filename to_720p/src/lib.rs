@@ -194,6 +194,10 @@ fn downscale(video: &Video, output_dir: &Path, cv: &str, ca: &str, replace: bool
         "-loglevel", "warning", "-hide_banner", "-stats"
     ];
 
+    if ca == "libopus" {
+        filters.extend(["-b:a", "192K"]);
+    }
+
     if let Some(filter) = video.vf_filter() {
         filters.extend(["-vf", filter]);
     }

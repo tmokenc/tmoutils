@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-matroska = "0.25"
-mp4 = "0.13"
+matroska = "0.26"
+mp4 = "0.14"
 humantime = "2"
 log.workspace = true
 clap.workspace = true
