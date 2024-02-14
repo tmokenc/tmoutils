@@ -3,7 +3,7 @@ mod walkdir;
 use clap::*;
 use std::cmp::Reverse;
 use std::fs;
-use std::io;
+use std::io::{self, Write as _};
 use walkdir::WalkDir;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -68,6 +68,7 @@ impl Args {
             }
 
             let path = item.path();
+
             let Some(filename) = path.file_name().and_then(|v| v.to_str()) else {
                 continue;
             };
@@ -89,6 +90,7 @@ impl Args {
         }
 
         print!("Process? (Y/else): ");
+        io::stdout().flush()?;
         let mut stdin = io::stdin().lines();
         if let Some(Ok(line)) = stdin.next() {
             if matches!(line.trim(), "y" | "yes") {

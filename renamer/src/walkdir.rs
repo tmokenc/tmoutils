@@ -64,7 +64,7 @@ impl Iterator for WalkDir {
                     };
 
                     if metadata.is_dir() {
-                        if matches!(self.max_depth, Some(max) if max < self.depth) {
+                        if !matches!(self.max_depth, Some(max) if max <= self.depth) {
                             self.folders.push(NextDir {
                                 path: item.path(),
                                 depth: self.depth + 1,
