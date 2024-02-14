@@ -31,7 +31,11 @@ pub struct Args {
     #[arg(long, short, default_value = ".")]
     location: String,
 
-    #[arg(long, short)]
+    #[arg(long, short, default_value_t = false)]
+    /// Delete matches file. This will overwrite the `replace` flag
+    delete: bool,
+
+    #[arg(long)]
     depth: Option<usize>,
 
     #[arg(long, default_value_t = false)]
@@ -86,7 +90,11 @@ impl Args {
         todolist.sort_by_key(|(current, _new)| Reverse(current.components().count()));
 
         for (i, (current, new)) in todolist.iter().enumerate() {
-            log::info!("{i}: {:#?}\n=> {:#?}", &current, &new);
+            if self.delete {
+                log::info!("To Delete: #{i} {:#?}", &current);
+            } else {
+                log::info!("To Rename: #{i} {:#?}\n=> {:#?}\n", &current, &new);
+            }
         }
 
         print!("Process? (Y/else): ");
@@ -95,8 +103,14 @@ impl Args {
         if let Some(Ok(line)) = stdin.next() {
             if matches!(line.trim(), "y" | "yes") {
                 for (current, new) in todolist {
-                    if let Err(why) = fs::rename(current, new) {
-                        log::error!("Error why renaming file\n{:#?}", why);
+                    if self.delete {
+                        if let Err(why) = fs::remove_file(current) {
+                            log::error!("Cannot delete file\n{:#?}", why);
+                        }
+                    } else {
+                        if let Err(why) = fs::rename(current, new) {
+                            log::error!("Cannot renaming file\n{:#?}", why);
+                        }
                     }
                 }
             }
