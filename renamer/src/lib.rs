@@ -87,6 +87,11 @@ impl Args {
             todolist.push((path, new_path));
         }
 
+        if todolist.is_empty() {
+            log::info!("Nothing matches");
+            return Ok(());
+        }
+
         todolist.sort_by_key(|(current, _new)| Reverse(current.components().count()));
 
         for (i, (current, new)) in todolist.iter().enumerate() {
