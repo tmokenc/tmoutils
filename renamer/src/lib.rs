@@ -109,8 +109,14 @@ impl Args {
             if matches!(line.trim(), "y" | "yes") {
                 for (current, new) in todolist {
                     if self.delete {
-                        if let Err(why) = fs::remove_file(current) {
-                            log::error!("Cannot delete file\n{:#?}", why);
+                        if current.is_dir() {
+                            if let Err(why) = fs::remove_dir_all(current) {
+                                log::error!("Cannot delete directory\n{:#?}", why);
+                            }
+                        } else {
+                            if let Err(why) = fs::remove_file(current) {
+                                log::error!("Cannot delete file\n{:#?}", why);
+                            }
                         }
                     } else {
                         if let Err(why) = fs::rename(current, new) {
