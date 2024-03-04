@@ -54,10 +54,10 @@ fn write_ffmpeg_merge(
     files: &[PathBuf],
 ) -> anyhow::Result<()> {
     let filename = path.file_name().and_then(|v| v.to_str()).unwrap();
-    let list_name = format!("{:?}/{filename}.txt", location.into());
+    let list_name = location.into().join(format!("{filename}.txt"));
     let mut list = fs::File::create(&list_name)?;
 
-    log::info!("Output: {}", list_name);
+    log::info!("Output: {:?}", list_name);
 
     for file in files {
         writeln!(&mut list, "file '{:?}'", file)?;
