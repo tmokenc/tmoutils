@@ -1,5 +1,5 @@
 [workspace]
-members = ["to_folder", "to_720p", "renamer", "to_mp3", "video_thumbnail", "macros", "serde_convert"]
+members = ["to_folder", "to_720p", "renamer", "to_mp3", "video_thumbnail", "macros", "serde_convert", "getvideos"]
 resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
