@@ -60,7 +60,7 @@ fn write_ffmpeg_merge(
     log::info!("Output: {:?}", list_name);
 
     for file in files {
-        writeln!(&mut list, "file '{:?}'", file)?;
+        writeln!(&mut list, "file '{}'", file.to_str().unwrap())?;
     }
 
     Ok(())
