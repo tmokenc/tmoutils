@@ -17,7 +17,7 @@ impl Args {
         fs::read_dir(&self.location)?
             .filter_map(|v| v.ok())
             .filter_map(get_dup)
-            .for_each(|(name, data)| write_ffmpeg_merge(&self.location, &name, &data).unwrap());
+            .for_each(|(name, data)| write_ffmpeg_merge(&self.location, name, data).unwrap());
 
         Ok(())
     }
@@ -50,9 +50,11 @@ fn get_dup(dir: fs::DirEntry) -> Option<(PathBuf, Vec<PathBuf>)> {
 
 fn write_ffmpeg_merge(
     location: impl Into<PathBuf>,
-    path: &PathBuf,
-    files: &[PathBuf],
+    path: PathBuf,
+    mut files: Vec<PathBuf>,
 ) -> anyhow::Result<()> {
+    files.sort_unstable();
+
     let filename = path.file_name().and_then(|v| v.to_str()).unwrap();
     let list_name = location.into().join(format!("{filename}.txt"));
     let mut list = fs::File::create(&list_name)?;
