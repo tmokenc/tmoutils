@@ -74,7 +74,9 @@ fn write_ffmpeg_merge(
 
     if let Some(Ok(line)) = stdin.next() {
         if matches!(line.to_ascii_lowercase().trim(), "y" | "yes") {
-            exec_ffmpeg(list_name, path.join(filename));
+            if !exec_ffmpeg(list_name, path.join(filename)) {
+                return Ok(());
+            }
 
             print!("Delete splitted video files? (Y/else): ");
             io::stdout().flush()?;
@@ -93,7 +95,7 @@ fn write_ffmpeg_merge(
     Ok(())
 }
 
-fn exec_ffmpeg(list: PathBuf, output: PathBuf) {
+fn exec_ffmpeg(list: PathBuf, output: PathBuf) -> bool {
     Command::new("ffmpeg")
         .args(["-safe", "0", "-f", "concat", "-i"])
         .arg(list)
@@ -102,7 +104,8 @@ fn exec_ffmpeg(list: PathBuf, output: PathBuf) {
         .spawn()
         .unwrap()
         .wait()
-        .unwrap();
+        .unwrap()
+        .success()
 }
 
 fn delete_videos(files: Vec<PathBuf>) {
