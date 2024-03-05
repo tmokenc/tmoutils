@@ -99,7 +99,9 @@ fn exec_ffmpeg(list: PathBuf, output: PathBuf) {
         .arg(list)
         .args(["-c", "copy"])
         .arg(output)
-        .output()
+        .spawn()
+        .unwrap()
+        .wait()
         .unwrap();
 }
 
