@@ -1,7 +1,8 @@
 use clap::*;
 use std::fs;
-use std::io::Write;
+use std::io::{self, Write};
 use std::path::PathBuf;
+use std::process::Command;
 
 const EXT: &[&str] = &["mp4", "avi", "mkv", "wmv"];
 
@@ -61,9 +62,49 @@ fn write_ffmpeg_merge(
 
     log::info!("Output: {:?}", list_name);
 
-    for file in files {
+    for (i, file) in files.iter().enumerate() {
         writeln!(&mut list, "file '{}'", file.to_str().unwrap())?;
+        println!("{i}: {:?}: ", file);
     }
 
+    let mut stdin = io::stdin().lines();
+
+    print!("Merge? (Y/else): ");
+    io::stdout().flush()?;
+
+    if let Some(Ok(line)) = stdin.next() {
+        if matches!(line.to_ascii_lowercase().trim(), "y" | "yes") {
+            exec_ffmpeg(list_name, path.join(filename));
+
+            print!("Delete splitted video files? (Y/else): ");
+            io::stdout().flush()?;
+
+            if let Some(Ok(line)) = stdin.next() {
+                if matches!(line.to_ascii_lowercase().trim(), "y" | "yes") {
+                    delete_videos(files);
+                }
+            }
+        }
+    }
+
+    print!("Delete splitted videos? (Y/else): ");
+    io::stdout().flush()?;
+
     Ok(())
+}
+
+fn exec_ffmpeg(list: PathBuf, output: PathBuf) {
+    Command::new("ffmpeg")
+        .args(["-safe", "0", "-f", "concat", "-i"])
+        .arg(list)
+        .args(["-c", "copy"])
+        .arg(output)
+        .output()
+        .unwrap();
+}
+
+fn delete_videos(files: Vec<PathBuf>) {
+    for file in files {
+        fs::remove_file(file).unwrap();
+    }
 }
