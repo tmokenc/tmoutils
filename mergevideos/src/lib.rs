@@ -74,7 +74,7 @@ fn write_ffmpeg_merge(
 
     if let Some(Ok(line)) = stdin.next() {
         if matches!(line.to_ascii_lowercase().trim(), "y" | "yes") {
-            if !exec_ffmpeg(list_name, path.join(format!("{:?}.mp4", filename))) {
+            if !exec_ffmpeg(list_name, path.join(format!("{}.mp4", filename))) {
                 return Ok(());
             }
 
