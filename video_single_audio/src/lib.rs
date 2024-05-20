@@ -66,7 +66,8 @@ impl Args {
             .filter(|v| v.path().extension().filter(|x| x == &"mkv").is_some());
 
         for entry in iter {
-            let info = MkvInfo::from_path(entry.path())?;
+            let mut info = MkvInfo::from_path(entry.path())?;
+            info.tracks.retain(|v| v.r#type == "audio");
 
             if info.tracks.len() < 2 {
                 continue;
@@ -75,7 +76,6 @@ impl Args {
             let maybe_track_id = info
                 .tracks
                 .iter()
-                .filter(|v| v.r#type == "audio")
                 .find(|v| {
                     v.properties.language_ietf == self.audio_name
                         || v.properties.language == self.audio_name
