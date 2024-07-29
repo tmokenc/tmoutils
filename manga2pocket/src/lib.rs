@@ -153,7 +153,7 @@ fn process_archive(archive: &std::path::Path, opt: &Args) -> anyhow::Result<()> 
 
     inner_files.sort();
 
-    let mut pages = Vec::new();
+    let mut pages: Vec<Page> = Vec::new();
     let Some(filestem) = path.file_stem() else {
         log::error!("{:?}: no filename", path);
         return Ok(());
@@ -173,11 +173,20 @@ fn process_archive(archive: &std::path::Path, opt: &Args) -> anyhow::Result<()> 
     for (i, file) in inner_files.into_iter().enumerate() {
         if METADATA_FILE.contains(&&*file) {
             let file = zip.by_name(&file)?;
+            let mut thumbnail = 1;
             match serde_yaml::from_reader(file) {
                 Ok(res) => {
+                    let res: CbzMetadata = res;
+                    thumbnail = res.thumbnail;
                     metadata.replace(res);
                 }
                 Err(why) => log::error!("{:?}: cannot parse metadata\n{:#?}", path, why),
+            }
+
+            if thumbnail != 1 {
+                if pages.len() >= thumbnail {
+                    pages[thumbnail - 1].is_cover = true;
+                }
             }
 
             continue;

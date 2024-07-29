@@ -1,0 +1,12 @@
+[package]
+name = "flatten_video_folder"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap.workspace = true
+log.workspace = true
+anyhow.workspace = true
+pretty_env_logger.workspace = true
+macros = { path = "../macros" }
+infer = "0.16"

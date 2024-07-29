@@ -5,7 +5,7 @@ use std::io::{Error, ErrorKind, Result};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const IMG_EXT: &'static [&'static str] = &["jpg", "png", "tiff"];
+const IMG_EXT: &'static [&'static str] = &["jpg", "jpeg", "png", "tiff", "webp"];
 const THUMBNAIL_NAME: &'static [&'static str] = &["folder", "cover", "thumbnail", "thumb"];
 
 #[derive(Parser, Debug)]
