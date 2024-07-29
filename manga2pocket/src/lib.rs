@@ -122,7 +122,7 @@ pub struct Args {
 
 impl Args {
     pub fn exec(&self) -> anyhow::Result<()> {
-        let mut iter = fs::read_dir(&self.location)?
+        fs::read_dir(&self.location)?
             .filter_map(Result::ok)
             .filter(|v| {
                 v.path()
@@ -130,21 +130,15 @@ impl Args {
                     .filter(|v| ARCHIVE_TYPE.iter().any(|x| x == v))
                     .is_some()
             })
-            .peekable();
-
-        while iter.peek().is_some() {
-            iter.by_ref()
-                .take(rayon::current_num_threads())
-                .collect::<Vec<_>>()
-                .into_par_iter()
-                .for_each(|v| {
+			.collect::<Vec<_>>()
+			.into_par_iter()
+			.for_each(|v| {
                     let path = v.path();
                     log::info!("{:?}", path);
                     if let Err(why) = process_archive(&path, self) {
                         log::error!("{:?}: Cannot process the archive\n{:#?}", path, why);
                     }
                 });
-        }
 
         Ok(())
     }
