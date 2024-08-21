@@ -6,7 +6,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 // From most to least
-const COVER_NAME_PRIORITY: &[&str] = &["cover", "backdrop", "folder"];
+const COVER_NAME_PRIORITY: &[&str] = &["folder", "backdrop", "cover"];
 
 #[derive(Debug, Parser)]
 /// Move the movie inside a directory out, its name will be renamed to the directory name.
