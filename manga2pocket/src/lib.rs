@@ -19,7 +19,7 @@ struct CbzMetadata {
     magazine: Vec<String>,
     tags: Vec<String>,
     released: Option<u64>,
-    #[serde(default)]
+    #[serde(default = "default_thumbnail")]
     pages: u64,
     #[serde(default = "default_thumbnail")]
     thumbnail: usize,
