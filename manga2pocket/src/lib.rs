@@ -12,14 +12,16 @@ const METADATA_FILE: &[&str] = &["info.yaml"];
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 struct CbzMetadata {
-    title: String,
+    title: Option<String>,
     artist: Vec<String>,
     circle: Vec<String>,
     parody: Vec<String>,
     magazine: Vec<String>,
     tags: Vec<String>,
     released: Option<u64>,
+    #[serde(default)]
     pages: u64,
+    #[serde(default = "default_thumbnail")]
     thumbnail: usize,
     url: Option<String>,
     source: Option<String>,
@@ -41,7 +43,9 @@ xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">
 <AgeRating>R18+</AgeRating>",
         );
 
-        write!(&mut res, "<Title>{}</Title>", self.title).unwrap();
+        if let Some(ref title) = self.title {
+            write!(&mut res, "<Title>{}</Title>", title).unwrap();
+        }
         write!(&mut res, "<PageCount>{}</PageCount>", self.pages).unwrap();
         let mut url = Vec::new();
         url.extend(self.source.to_owned());
@@ -130,15 +134,15 @@ impl Args {
                     .filter(|v| ARCHIVE_TYPE.iter().any(|x| x == v))
                     .is_some()
             })
-			.collect::<Vec<_>>()
-			.into_par_iter()
-			.for_each(|v| {
-                    let path = v.path();
-                    log::info!("{:?}", path);
-                    if let Err(why) = process_archive(&path, self) {
-                        log::error!("{:?}: Cannot process the archive\n{:#?}", path, why);
-                    }
-                });
+            .collect::<Vec<_>>()
+            .into_par_iter()
+            .for_each(|v| {
+                let path = v.path();
+                log::info!("{:?}", path);
+                if let Err(why) = process_archive(&path, self) {
+                    log::error!("{:?}: Cannot process the archive\n{:#?}", path, why);
+                }
+            });
 
         Ok(())
     }
@@ -222,7 +226,7 @@ fn process_archive(archive: &std::path::Path, opt: &Args) -> anyhow::Result<()> 
         {
             result.raw_copy_file(image_data)?;
         } else {
-            result.start_file(file.replace(".png", ".jpg"), Default::default())?;
+            result.start_file::<String, ()>(file.replace(".png", ".jpg"), Default::default())?;
             let buf = Vec::new();
             let mut writer = std::io::BufWriter::new(std::io::Cursor::new(buf));
 
@@ -252,11 +256,15 @@ fn process_archive(archive: &std::path::Path, opt: &Args) -> anyhow::Result<()> 
     }
 
     if let Some(ref metadata) = metadata {
-        result.start_file("ComicInfo.xml", Default::default())?;
+        result.start_file("ComicInfo.xml", zip::write::SimpleFileOptions::default())?;
         result.write_all(metadata.to_comicinfo(&pages).as_bytes())?;
     } else {
         log::warn!("No metadata found in {:?}", archive);
     }
 
     Ok(())
+}
+
+fn default_thumbnail() -> usize {
+    1
 }
