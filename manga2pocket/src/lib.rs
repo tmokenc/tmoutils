@@ -19,7 +19,7 @@ struct CbzMetadata {
     magazine: Vec<String>,
     tags: Vec<String>,
     released: Option<u64>,
-    #[serde(default = "default_thumbnail")]
+    #[serde(default = "default_page")]
     pages: u64,
     #[serde(default = "default_thumbnail")]
     thumbnail: usize,
@@ -263,6 +263,10 @@ fn process_archive(archive: &std::path::Path, opt: &Args) -> anyhow::Result<()> 
     }
 
     Ok(())
+}
+
+fn default_page() -> u64 {
+    1
 }
 
 fn default_thumbnail() -> usize {
