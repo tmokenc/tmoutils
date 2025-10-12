@@ -90,29 +90,33 @@ impl Args {
             }
         }
 
+        if videos.is_empty() {
+            return Ok(());
+        }
+
         // Moving out
         videos.sort();
 
-        if videos.len() == 1 {
-            let video = videos.pop().unwrap();
-            if let Some(filename) = video.file_name() {
-                let mut new_path = parent.join(filename);
-                set_file_stem(&mut new_path, dir_name);
-                rename_guard(video, new_path);
-            }
-        } else {
-            for (video, i) in videos.into_iter().zip(1..) {
-                let Some(filename) = video.file_name() else {
-                    continue;
-                };
+        let mut iter = videos.into_iter();
 
-                let mut new_path = parent.join(filename);
-                set_file_stem(
-                    &mut new_path,
-                    format!("{}_{}", dir_name.to_string_lossy(), i),
-                );
-                rename_guard(video, new_path);
-            }
+        let first = iter.next().unwrap();
+        if let Some(filename) = first.file_name() {
+            let mut new_path = parent.join(filename);
+            set_file_stem(&mut new_path, dir_name);
+            rename_guard(first, new_path);
+        }
+
+        for (video, i) in iter.zip(2..) {
+            let Some(filename) = video.file_name() else {
+                continue;
+            };
+
+            let mut new_path = parent.join(filename);
+            set_file_stem(
+                &mut new_path,
+                format!("{}_{}", dir_name.to_string_lossy(), i),
+            );
+            rename_guard(video, new_path);
         }
 
         if let Some(cover) = cover_image {

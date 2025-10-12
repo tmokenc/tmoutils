@@ -1,0 +1,11 @@
+[package]
+name = "folder_intersect"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap.workspace = true
+log.workspace = true
+anyhow.workspace = true
+pretty_env_logger.workspace = true
+macros = { path = "../macros" }
