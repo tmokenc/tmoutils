@@ -44,6 +44,10 @@ pub struct Args {
     /// Chose the encoder for audio
     audio: String,
 
+    #[clap(short, long, default_value = "auto")]
+    /// Chose the frame rate for the output video
+    frame_rate: String,
+
     #[clap(long)]
     /// Ignore files or folders
     ignore: Vec<String>,
@@ -70,7 +74,14 @@ impl Args {
             let video = Video::from_path(&path)?;
 
             if video.is_over_sized() {
-                downscale(&video, &output_dir, &self.video, &self.audio, self.replace)?;
+                downscale(
+                    &video,
+                    &output_dir,
+                    &self.video,
+                    &self.audio,
+                    &self.frame_rate,
+                    self.replace,
+                )?;
             } else {
                 panic!("The video looks fine");
             }
@@ -160,7 +171,14 @@ impl Args {
             );
 
             let video_start = Instant::now();
-            match downscale(&video, &output_dir, &self.video, &self.audio, self.replace) {
+            match downscale(
+                &video,
+                &output_dir,
+                &self.video,
+                &self.audio,
+                &self.frame_rate,
+                self.replace,
+            ) {
                 Ok(_) => log::info!(
                     "Done! This video took {}",
                     humantime::format_duration(video_start.elapsed())
@@ -183,7 +201,7 @@ impl Args {
 }
 
 #[rustfmt::skip]
-fn downscale(video: &Video, output_dir: &Path, cv: &str, ca: &str, replace: bool) -> Result<()> {
+fn downscale(video: &Video, output_dir: &Path, cv: &str, ca: &str, frame_rate: &str, replace: bool) -> Result<()> {
     let file_name = format!("{}.mp4", video.path.file_stem().unwrap().to_str().unwrap());
     let output = output_dir.join(&file_name);
     let mut command = Command::new("ffmpeg");
@@ -196,6 +214,10 @@ fn downscale(video: &Video, output_dir: &Path, cv: &str, ca: &str, replace: bool
 
     if ca == "libopus" {
         filters.extend(["-b:a", "192K"]);
+    }
+
+    if !frame_rate.is_empty() && frame_rate != "auto" {
+        filters.extend(["-r", frame_rate]);
     }
 
     if let Some(filter) = video.vf_filter() {
